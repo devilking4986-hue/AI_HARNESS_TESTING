@@ -108,6 +108,37 @@ describe('UserService', () => {
     });
   });
 
+  describe('findByEmail', () => {
+    it('finds a user by an exact email address', async () => {
+      const service = makeService();
+      const created = await service.createUser({
+        name: 'Alice',
+        email: 'alice@example.com',
+        password: PASSWORD,
+      });
+
+      assert.equal(service.findByEmail('alice@example.com').id, created.id);
+    });
+
+    it('finds a user regardless of the casing that is queried', async () => {
+      const service = makeService();
+      const created = await service.createUser({
+        name: 'Alice',
+        email: 'alice@example.com',
+        password: PASSWORD,
+      });
+
+      assert.equal(service.findByEmail('ALICE@EXAMPLE.COM').id, created.id);
+      assert.equal(service.findByEmail('Alice@Example.Com').id, created.id);
+    });
+
+    it('returns null for an address that is not registered', () => {
+      const service = makeService();
+
+      assert.equal(service.findByEmail('nobody@example.com'), null);
+    });
+  });
+
   describe('getUserById', () => {
     it('finds an existing user', async () => {
       const service = makeService();
@@ -173,6 +204,20 @@ describe('UserService', () => {
       assert.equal(service.getUserById(user.id).name, 'Alice Cooper');
     });
 
+    it('updates the email', async () => {
+      const service = makeService();
+      const user = await service.createUser({
+        name: 'Alice',
+        email: 'alice@example.com',
+        password: PASSWORD,
+      });
+
+      service.updateUser(user.id, { email: 'alice.cooper@example.com' });
+
+      assert.equal(service.getUserById(user.id).email, 'alice.cooper@example.com');
+      assert.equal(service.findByEmail('alice.cooper@example.com').id, user.id);
+    });
+
     it('ignores attempts to overwrite id and role', async () => {
       const service = makeService();
       const user = await service.createUser({
@@ -184,6 +229,22 @@ describe('UserService', () => {
       service.updateUser(user.id, { id: 999, role: 'admin' });
 
       const updated = service.getUserById(user.id);
+      assert.equal(updated.id, 1);
+      assert.equal(updated.role, 'user');
+    });
+
+    it('still applies the allowed fields alongside a rejected one', async () => {
+      const service = makeService();
+      const user = await service.createUser({
+        name: 'Alice',
+        email: 'alice@example.com',
+        password: PASSWORD,
+      });
+
+      service.updateUser(user.id, { name: 'Alice Cooper', id: 999, role: 'admin' });
+
+      const updated = service.getUserById(user.id);
+      assert.equal(updated.name, 'Alice Cooper');
       assert.equal(updated.id, 1);
       assert.equal(updated.role, 'user');
     });

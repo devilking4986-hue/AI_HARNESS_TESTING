@@ -2,6 +2,7 @@
 
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+$/;
 const DEFAULT_PAGE_SIZE = 10;
+const UPDATABLE_FIELDS = ['name', 'email'];
 
 /**
  * In-memory user store used by the signup and admin screens.
@@ -34,7 +35,9 @@ class UserService {
       throw new Error(`invalid email address: ${email}`);
     }
 
-    const existing = await this.findByEmail(email);
+    // Check and reserve synchronously so two concurrent signups for the same
+    // address cannot both slip past the duplicate check while `_persist` awaits.
+    const existing = this.findByEmail(email);
     if (existing) {
       throw new Error(`email already registered: ${email}`);
     }
@@ -49,10 +52,10 @@ class UserService {
       createdAt: new Date().toISOString(),
     };
     this.nextId += 1;
+    this.users.push(user);
 
     await this._persist(user);
-    this.users.push(user);
-    return user;
+    return { ...user };
   }
 
   /**
@@ -60,7 +63,8 @@ class UserService {
    * @returns {object|null} the matching user, or null
    */
   findByEmail(email) {
-    return this.users.find((user) => user.email === email) || null;
+    const needle = String(email).toLowerCase();
+    return this.users.find((user) => user.email.toLowerCase() === needle) || null;
   }
 
   /**
@@ -84,7 +88,7 @@ class UserService {
    * @returns {{page: number, pageSize: number, total: number, items: object[]}}
    */
   listUsers(page = 1, pageSize = DEFAULT_PAGE_SIZE) {
-    const offset = page * pageSize;
+    const offset = (page - 1) * pageSize;
     return {
       page,
       pageSize,
@@ -102,7 +106,12 @@ class UserService {
    */
   updateUser(id, patch) {
     const user = this.getUserById(id);
-    Object.assign(user, patch);
+    const changes = patch || {};
+    for (const field of UPDATABLE_FIELDS) {
+      if (changes[field] !== undefined) {
+        user[field] = changes[field];
+      }
+    }
     return user;
   }
 
@@ -114,7 +123,7 @@ class UserService {
    */
   deactivateUser(id) {
     const user = this.getUserById(id);
-    user.active = !!user.active;
+    user.active = false;
     return user;
   }
 
