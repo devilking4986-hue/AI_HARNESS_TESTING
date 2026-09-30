@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Coverage / reports
+coverage/
+*.lcov
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS noise
+.DS_Store
+.idea/
+.vscode/
+
+# Answer key for the seeded defects - kept out of the repository on purpose.
+SEEDED_BUGS.md

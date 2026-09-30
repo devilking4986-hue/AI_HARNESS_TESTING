@@ -1,0 +1,22 @@
+{
+  "name": "ai-harness-test-repo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Synthetic Node.js service used to exercise AI coding/review harnesses. Contains intentionally seeded defects.",
+  "license": "MIT",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test",
+    "test:calculator": "node --test tests/calculator.test.js",
+    "test:users": "node --test tests/users.test.js",
+    "test:auth": "node --test tests/auth.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "test-fixture",
+    "bug-seeding",
+    "ai-harness"
+  ]
+}
