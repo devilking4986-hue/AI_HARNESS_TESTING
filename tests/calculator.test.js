@@ -13,6 +13,20 @@ describe('Calculator', () => {
       assert.equal(calc.add(2, 3), 5);
     });
 
+    it('adds two negative numbers', () => {
+      assert.equal(calc.add(-2, -3), -5);
+    });
+
+    it('adds numbers with mixed signs', () => {
+      assert.equal(calc.add(-2, 5), 3);
+      assert.equal(calc.add(5, -8), -3);
+    });
+
+    it('returns the other operand when adding zero', () => {
+      assert.equal(calc.add(0, 7), 7);
+      assert.equal(calc.add(-7, 0), -7);
+    });
+
     it('subtracts numbers', () => {
       assert.equal(calc.subtract(10, 4), 6);
     });
@@ -34,6 +48,11 @@ describe('Calculator', () => {
     it('throws a RangeError when the divisor is 0', () => {
       assert.throws(() => calc.divide(1, 0), RangeError);
     });
+
+    it('throws for a zero divisor regardless of the numerator', () => {
+      assert.throws(() => calc.divide(0, 0), RangeError);
+      assert.throws(() => calc.divide(-5, 0), RangeError);
+    });
   });
 
   describe('sumRange', () => {
@@ -47,6 +66,10 @@ describe('Calculator', () => {
 
     it('returns 0 when start is greater than end', () => {
       assert.equal(calc.sumRange(5, 1), 0);
+    });
+
+    it('handles negative bounds', () => {
+      assert.equal(calc.sumRange(-2, 2), 0);
     });
   });
 
@@ -67,6 +90,11 @@ describe('Calculator', () => {
       assert.equal(calc.isPrime(4), false);
       assert.equal(calc.isPrime(9), false);
     });
+
+    it('rejects larger prime squares', () => {
+      assert.equal(calc.isPrime(25), false);
+      assert.equal(calc.isPrime(49), false);
+    });
   });
 
   describe('parseNumber', () => {
@@ -82,11 +110,24 @@ describe('Calculator', () => {
       assert.ok(Number.isNaN(calc.parseNumber('12abc')));
       assert.ok(Number.isNaN(calc.parseNumber('0x10')));
     });
+
+    it('returns NaN for empty or whitespace-only input', () => {
+      assert.ok(Number.isNaN(calc.parseNumber('')));
+      assert.ok(Number.isNaN(calc.parseNumber('   ')));
+    });
+
+    it('returns NaN for exponential notation', () => {
+      assert.ok(Number.isNaN(calc.parseNumber('1e3')));
+    });
   });
 
   describe('average', () => {
     it('averages a list of numbers', () => {
       assert.equal(calc.average([2, 4, 6]), 4);
+    });
+
+    it('averages a list containing negative numbers', () => {
+      assert.equal(calc.average([-2, 2]), 0);
     });
 
     it('throws a RangeError for an empty list', () => {
@@ -105,6 +146,16 @@ describe('Calculator', () => {
     it('detects even and odd positive numbers', () => {
       assert.equal(calc.isEven(4), true);
       assert.equal(calc.isEven(7), false);
+    });
+
+    it('detects even and odd negative numbers', () => {
+      assert.equal(calc.isEven(-4), true);
+      assert.equal(calc.isEven(-3), false);
+      assert.equal(calc.isEven(-1), false);
+    });
+
+    it('treats zero as even', () => {
+      assert.equal(calc.isEven(0), true);
     });
   });
 

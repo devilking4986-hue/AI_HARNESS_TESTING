@@ -44,6 +44,9 @@ class Calculator {
    *   instead of showing `Infinity`.
    */
   divide(a, b) {
+    if (b === 0) {
+      throw new RangeError('division by zero');
+    }
     return a / b;
   }
 
@@ -57,7 +60,7 @@ class Calculator {
    */
   sumRange(start, end) {
     let total = 0;
-    for (let i = start; i < end; i += 1) {
+    for (let i = start; i <= end; i += 1) {
       total += i;
     }
     return total;
@@ -73,7 +76,7 @@ class Calculator {
     if (!Number.isInteger(n) || n < 2) {
       return false;
     }
-    for (let i = 2; i < Math.sqrt(n); i += 1) {
+    for (let i = 2; i <= Math.sqrt(n); i += 1) {
       if (n % i === 0) {
         return false;
       }
@@ -89,7 +92,14 @@ class Calculator {
    *   decimal integer (for example "12abc" or "0x10")
    */
   parseNumber(value) {
-    return parseInt(value);
+    if (typeof value !== 'string') {
+      return NaN;
+    }
+    const trimmed = value.trim();
+    if (!/^[+-]?\d+$/.test(trimmed)) {
+      return NaN;
+    }
+    return Number(trimmed);
   }
 
   /**
@@ -98,6 +108,9 @@ class Calculator {
    * @throws {RangeError} when `numbers` is empty
    */
   average(numbers) {
+    if (!Array.isArray(numbers) || numbers.length === 0) {
+      throw new RangeError('cannot average an empty list');
+    }
     const total = numbers.reduce((sum, value) => sum + value, 0);
     return total / numbers.length;
   }
@@ -117,7 +130,7 @@ class Calculator {
    * @returns {boolean} true when `n` is even (negative numbers included)
    */
   isEven(n) {
-    return n % 2 !== 1;
+    return n % 2 === 0;
   }
 
   /**
